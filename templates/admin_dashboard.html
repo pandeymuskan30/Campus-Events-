@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Campus Events</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='dist/output.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #f7f9fc; }
+  </style>
+</head>
+<body class="antialiased flex flex-col md:flex-row min-h-screen">
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="w-full md:w-64 bg-indigo-700 text-white flex flex-col md:min-h-screen transition-transform transform md:translate-x-0 -translate-x-full md:relative fixed z-50">
+    <div class="flex justify-between items-center p-6 border-b border-indigo-500">
+      <div class="text-2xl font-bold">Admin Panel</div>
+      <button class="md:hidden" onclick="toggleSidebar()"><i class="fas fa-times"></i></button>
+    </div>
+    <nav class="flex-1 p-4 space-y-4">
+      <a href="#dashboard" class="block p-2 rounded hover:bg-indigo-600"><i class="fas fa-chart-line mr-2"></i> Dashboard</a>
+      <a href="#add-event" class="block p-2 rounded hover:bg-indigo-600"><i class="fas fa-plus mr-2"></i> Add Event</a>
+      <a href="#manage-events" class="block p-2 rounded hover:bg-indigo-600"><i class="fas fa-tasks mr-2"></i> Manage Events</a>
+            <a href="#event-registrations" class="block p-2 rounded hover:bg-indigo-600"><i class="fas fa-clipboard-list mr-2"></i> Event Registrations</a>
+      <a href="{{ url_for('organizers') }}" class="block p-2 rounded hover:bg-indigo-600"><i class="fas fa-user-tie mr-2"></i> Organizers</a>
+      <a href="{{ url_for('all_users') }}" class="block p-2 rounded hover:bg-indigo-600"><i class="fas fa-users mr-2"></i> All Users</a>
+      <a href="{{ url_for('index') }}" class="block p-2 rounded hover:bg-indigo-600"><i class="fas fa-globe mr-2"></i> User Site</a>
+      <!-- New Event Report Link -->
+<a href="{{ url_for('event_report') }}" class="block p-2 rounded hover:bg-indigo-600">
+    <i class="fas fa-file-alt mr-2"></i> Event Report
+</a>
+
+    </nav>
+  </aside>
+
+  <!-- Mobile Menu Button -->
+  <button class="fixed top-4 right-4 z-50 md:hidden bg-indigo-700 text-white p-2 rounded-lg shadow-lg" onclick="toggleSidebar()">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <!-- Main Content -->
+  <main class="flex-1 p-4 md:p-6 overflow-y-auto">
+
+    <!-- Dashboard Section -->
+    <section id="dashboard" class="mb-8">
+      <h1 class="text-2xl md:text-3xl font-bold text-indigo-700 mb-6">Dashboard</h1>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+        <div class="bg-white shadow rounded-xl p-4 md:p-6 text-center">
+          <h2 class="text-xl md:text-2xl font-bold text-indigo-700" id="totalEvents">0</h2>
+          <p class="text-gray-500 text-sm md:text-base">Total Events</p>
+        </div>
+        <div class="bg-white shadow rounded-xl p-4 md:p-6 text-center">
+          <h2 class="text-xl md:text-2xl font-bold text-indigo-700" id="totalCategories">0</h2>
+          <p class="text-gray-500 text-sm md:text-base">Categories</p>
+        </div>
+        <div class="bg-white shadow rounded-xl p-4 md:p-6 text-center">
+          <h2 class="text-xl md:text-2xl font-bold text-indigo-700" id="upcomingEvents">0</h2>
+          <p class="text-gray-500 text-sm md:text-base">Upcoming Events</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Add Event Section -->
+    <section id="add-event" class="bg-white shadow-md rounded-2xl p-4 md:p-6 mb-8">
+      <h2 class="text-xl md:text-2xl font-bold text-indigo-700 mb-4 md:mb-6">Add New Event</h2>
+      <form id="eventForm" class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        <div>
+          <label class="block mb-1 md:mb-2 font-semibold">Event Title</label>
+          <input type="text" id="title" class="w-full border px-3 py-2 md:px-4 md:py-2 rounded-lg focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+        <div>
+          <label class="block mb-1 md:mb-2 font-semibold">Category</label>
+          <select id="category" class="w-full border px-3 py-2 md:px-4 md:py-2 rounded-lg focus:ring-2 focus:ring-indigo-500">
+            <option value="Academic">Academic</option>
+            <option value="Cultural">Cultural</option>
+            <option value="Sports">Sports</option>
+            <option value="Social">Social</option>
+          </select>
+        </div>
+        <div class="md:col-span-2">
+          <label class="block mb-1 md:mb-2 font-semibold">Description</label>
+          <textarea id="description" rows="3" class="w-full border px-3 py-2 md:px-4 md:py-2 rounded-lg focus:ring-2 focus:ring-indigo-500"></textarea>
+        </div>
+        <div>
+          <label class="block mb-1 md:mb-2 font-semibold">Event Date</label>
+          <input type="date" id="date" class="w-full border px-3 py-2 md:px-4 md:py-2 rounded-lg focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+        <div>
+          <label class="block mb-1 md:mb-2 font-semibold">Upload Image</label>
+          <input type="file" name="image" id="image" accept="image/*" class="w-full border px-3 py-2 md:px-4 md:py-2 rounded-lg focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div class="md:col-span-2 flex justify-end">
+          <button type="submit" class="bg-indigo-600 text-white px-4 py-2 md:px-6 md:py-2 rounded-full hover:bg-indigo-700">
+            <i class="fas fa-plus mr-2"></i> Add Event
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Manage Events Section -->
+    <section id="manage-events" class="bg-white shadow-md rounded-2xl p-4 md:p-6 mb-8">
+      <h2 class="text-xl md:text-2xl font-bold text-indigo-700 mb-4 md:mb-6">Manage Events</h2>
+      <div id="admin-event-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6"></div>
+    </section>
+
+    <!-- Event Registrations Section -->
+    <section id="event-registrations" class="bg-white shadow-md rounded-2xl p-4 md:p-6 mb-8">
+      <h2 class="text-xl md:text-2xl font-bold text-indigo-700 mb-4 md:mb-6">Event Registrations</h2>
+      
+      <!-- Select Event -->
+      <div class="mb-4 md:mb-6">
+        <label class="block mb-1 font-semibold">Select Event</label>
+        <select id="registrationEventSelect" class="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500">
+          <option value="">-- Select Event --</option>
+        </select>
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex justify-end mb-4 gap-2">
+        <button onclick="saveAttendance()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+          <i class="fas fa-save mr-2"></i> Save Attendance
+        </button>
+        <button onclick="downloadPDF()" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+          <i class="fas fa-file-pdf mr-2"></i> Download PDF
+        </button>
+        <button onclick="generateCertificates()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
+          <i class="fas fa-certificate mr-2"></i> Generate Certificates
+        </button>
+      </div>
+
+      <!-- Registrations Table -->
+      <div class="overflow-x-auto">
+        <table id="registrationTable" class="w-full table-auto border-collapse border border-gray-200 text-left">
+          <thead class="bg-indigo-100">
+            <tr>
+              <th class="px-4 py-2 border">Full Name</th>
+              <th class="px-4 py-2 border">Email</th>
+              <th class="px-4 py-2 border">Phone</th>
+              <th class="px-4 py-2 border">College</th>
+              <th class="px-4 py-2 border">Class</th>
+              <th class="px-4 py-2 border">Registration Date</th>
+              <th class="px-4 py-2 border">Attendance</th>
+            </tr>
+          </thead>
+          <tbody id="registrationList">
+            <tr><td colspan="7" class="text-gray-500 text-center py-4">Select an event to see registrations</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Edit Event Modal -->
+  <div id="editEventModal" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div class="bg-white rounded-2xl shadow-lg w-full max-w-lg p-6 relative">
+      <h2 class="text-2xl font-bold text-indigo-700 mb-4">Edit Event</h2>
+      <form id="editEventForm" class="grid grid-cols-1 gap-4">
+        <input type="hidden" id="editEventId">
+        <div>
+          <label class="block mb-1 font-semibold">Event Title</label>
+          <input type="text" id="editTitle" class="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+        <div>
+          <label class="block mb-1 font-semibold">Category</label>
+          <select id="editCategory" class="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500">
+            <option value="Academic">Academic</option>
+            <option value="Cultural">Cultural</option>
+            <option value="Sports">Sports</option>
+            <option value="Social">Social</option>
+          </select>
+        </div>
+        <div>
+          <label class="block mb-1 font-semibold">Description</label>
+          <textarea id="editDescription" rows="3" class="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500"></textarea>
+        </div>
+        <div>
+          <label class="block mb-1 font-semibold">Event Date</label>
+          <input type="date" id="editDate" class="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+        <div>
+          <label class="block mb-1 font-semibold">Upload Image (optional)</label>
+          <input type="file" id="editImage" accept="image/*" class="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div class="flex justify-end gap-2 mt-4">
+          <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+            <i class="fas fa-save mr-2"></i> Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- jsPDF + AutoTable -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+  <script>
+    const sidebar = document.getElementById("sidebar");
+    function toggleSidebar() { sidebar.classList.toggle("-translate-x-full"); }
+
+    const form = document.getElementById("eventForm");
+    const eventList = document.getElementById("admin-event-list");
+    const registrationSelect = document.getElementById("registrationEventSelect");
+    const registrationList = document.getElementById("registrationList");
+    let eventDetails = {};
+
+    // Load Dashboard Stats
+    async function loadStats() {
+      const res = await fetch("/get_stats");
+      const stats = await res.json();
+      document.getElementById("totalEvents").textContent = stats.total;
+      document.getElementById("totalCategories").textContent = stats.categories;
+      document.getElementById("upcomingEvents").textContent = stats.upcoming;
+    }
+
+    // Render Events
+    async function renderEvents() {
+      const res = await fetch("/get_events");
+      const events = await res.json();
+      eventList.innerHTML = "";
+      if (events.length === 0) {
+        eventList.innerHTML = "<p class='text-gray-500'>No events added yet.</p>";
+      } else {
+        events.forEach(event => {
+          eventDetails[event.id] = event;
+          const card = document.createElement("div");
+          card.className = "border rounded-xl shadow-md overflow-hidden bg-white";
+          card.innerHTML = `
+            <img src="${event.image || 'https://via.placeholder.com/400x200'}" 
+                 alt="${event.title}" 
+                 class="w-full h-40 object-cover">
+            <div class="p-4">
+              <h3 class="text-lg md:text-xl font-semibold text-indigo-700">${event.title}</h3>
+              <p class="text-sm text-gray-500 mb-2">${event.category} • ${event.date}</p>
+              <p class="text-gray-600 mb-4">${event.description}</p>
+              <div class="flex justify-between text-sm">
+                <button onclick="editEvent(${event.id})" class="text-blue-600 hover:underline"><i class="fas fa-edit"></i> Edit</button>
+                <button onclick="deleteEvent(${event.id})" class="text-red-600 hover:underline"><i class="fas fa-trash"></i> Delete</button>
+              </div>
+            </div>
+          `;
+          eventList.appendChild(card);
+        });
+      }
+      loadStats();
+    }
+
+    // Event Form Submission
+    form.addEventListener("submit", async e => {
+      e.preventDefault();
+      const formData = new FormData();
+      formData.append("title", document.getElementById("title").value);
+      formData.append("category", document.getElementById("category").value);
+      formData.append("description", document.getElementById("description").value);
+      formData.append("date", document.getElementById("date").value);
+      const imageFile = document.getElementById("image").files[0];
+      if (imageFile) formData.append("image", imageFile);
+      await fetch("/add_event", { method: "POST", body: formData });
+      form.reset();
+      renderEvents();
+      loadEventOptions();
+    });
+
+    async function deleteEvent(id) {
+      await fetch(`/delete_event/${id}`, { method: "DELETE" });
+      renderEvents();
+      loadEventOptions();
+    }
+
+    // ---------------- Edit Event ----------------
+    function editEvent(id) {
+      const event = eventDetails[id];
+      if (!event) return;
+      document.getElementById("editEventId").value = id;
+      document.getElementById("editTitle").value = event.title;
+      document.getElementById("editCategory").value = event.category;
+      document.getElementById("editDescription").value = event.description;
+      document.getElementById("editDate").value = event.date;
+      document.getElementById("editEventModal").classList.remove("hidden");
+    }
+
+    function closeEditModal() {
+      document.getElementById("editEventForm").reset();
+      document.getElementById("editEventModal").classList.add("hidden");
+    }
+
+    document.getElementById("editEventForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const eventId = document.getElementById("editEventId").value;
+      const formData = new FormData();
+      formData.append("title", document.getElementById("editTitle").value);
+      formData.append("category", document.getElementById("editCategory").value);
+      formData.append("description", document.getElementById("editDescription").value);
+      formData.append("date", document.getElementById("editDate").value);
+      const imageFile = document.getElementById("editImage").files[0];
+      if (imageFile) formData.append("image", imageFile);
+
+      const res = await fetch(`/update_event/${eventId}`, { method: "POST", body: formData });
+      const data = await res.json();
+      if (res.ok) {
+        alert(`✅ ${data.message}`);
+        closeEditModal();
+        renderEvents();
+        loadEventOptions();
+      } else {
+        alert(`❌ Failed: ${data.error}`);
+      }
+    });
+
+    // ---------------- Registrations ----------------
+    async function loadEventOptions() {
+      const res = await fetch("/get_events");
+      const events = await res.json();
+      registrationSelect.innerHTML = '<option value="">-- Select Event --</option>';
+      events.forEach(event => {
+        eventDetails[event.id] = event;
+        const option = document.createElement("option");
+        option.value = event.id;
+        option.textContent = event.title;
+        registrationSelect.appendChild(option);
+      });
+    }
+
+    registrationSelect.addEventListener("change", async function() {
+      const eventId = this.value;
+      if (!eventId) { registrationList.innerHTML = '<tr><td colspan="7" class="text-gray-500 text-center py-4">Select an event to see registrations</td></tr>'; return; }
+      const res = await fetch(`/get_event_registrations/${eventId}`);
+      const registrations = await res.json();
+      if (registrations.length === 0) { registrationList.innerHTML = '<tr><td colspan="7" class="text-gray-500 text-center py-4">No registrations yet.</td></tr>'; }
+      else {
+        registrationList.innerHTML = "";
+        registrations.forEach(user => {
+          registrationList.innerHTML += `
+            <tr>
+              <td class="px-4 py-2 border">${user.full_name}</td>
+              <td class="px-4 py-2 border">${user.email}</td>
+              <td class="px-4 py-2 border">${user.phone}</td>
+              <td class="px-4 py-2 border">${user.college}</td>
+              <td class="px-4 py-2 border">${user.class}</td>
+              <td class="px-4 py-2 border">${user.registration_date}</td>
+              <td class="px-4 py-2 border text-center"><input type="checkbox" data-id="${user.id}" ${user.attendance == 1 ? "checked" : ""}></td>
+            </tr>
+          `;
+        });
+      }
+    });
+
+    async function saveAttendance() {
+      const updates = [];
+      document.querySelectorAll("#registrationList input[type='checkbox']").forEach(cb => updates.push({ id: cb.dataset.id, attendance: cb.checked ? 1 : 0 }));
+      const res = await fetch("/save_attendance", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ updates }) });
+      if (res.ok) alert("✅ Attendance saved successfully!"); else alert("❌ Failed to save attendance");
+    }
+
+    async function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const rows = [];
+      const headers = ["Name", "Email", "Phone", "College", "Class", "Reg Date", "Attendance"];
+      document.querySelectorAll("#registrationList tr").forEach(tr => {
+        const cols = tr.querySelectorAll("td");
+        if (cols.length > 0) {
+          rows.push([cols[0].innerText, cols[1].innerText, cols[2].innerText, cols[3].innerText, cols[4].innerText, cols[5].innerText, cols[6].querySelector("input")?.checked ? "Present" : "Absent"]);
+        }
+      });
+      doc.text("Event Registrations", 14, 15);
+      doc.autoTable({ head: [headers], body: rows, startY: 20 });
+      doc.save("registrations.pdf");
+    }
+
+    // ---------------- Certificates ----------------
+    async function generateCertificates() {
+      const eventId = registrationSelect.value;
+      if (!eventId) { alert("Please select an event first."); return; }
+      const res = await fetch(`/generate_certificates/${eventId}`, { method: "POST" });
+      const data = await res.json();
+      if (res.ok) { alert(`✅ ${data.message}`); } else { alert(`❌ Failed: ${data.error || "Unknown error"}`); }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => { renderEvents(); loadStats(); loadEventOptions(); });
+  </script>
+</body>
+</html>

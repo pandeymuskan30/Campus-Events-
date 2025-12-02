@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Users - Admin</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='dist/output.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #f7f9fc; }
+  </style>
+</head>
+<body class="antialiased flex flex-col md:flex-row min-h-screen">
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="w-full md:w-64 bg-indigo-700 text-white flex flex-col md:min-h-screen transition-transform transform md:translate-x-0 -translate-x-full md:relative fixed z-50">
+    <div class="flex justify-between items-center p-6 border-b border-indigo-500">
+      <div class="text-2xl font-bold">Admin Panel</div>
+      <button class="md:hidden" onclick="toggleSidebar()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <nav class="flex-1 p-4 space-y-4">
+      <a href="{{ url_for('admin') }}" class="block p-2 rounded hover:bg-indigo-600"><i class="fas fa-chart-line mr-2"></i> Dashboard</a>
+      <a href="{{ url_for('all_users') }}" class="block p-2 rounded bg-indigo-800"><i class="fas fa-users mr-2"></i> All Users</a>
+      <a href="{{ url_for('index') }}" class="block p-2 rounded hover:bg-indigo-600"><i class="fas fa-globe mr-2"></i> User Site</a>
+    </nav>
+  </aside>
+
+  <!-- Mobile Menu Button -->
+  <button class="fixed top-4 right-4 z-50 md:hidden bg-indigo-700 text-white p-2 rounded-lg shadow-lg" onclick="toggleSidebar()">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <!-- Main Content -->
+  <main class="flex-1 p-4 md:p-6 overflow-y-auto">
+    <h1 class="text-2xl md:text-3xl font-bold text-indigo-700 mb-6">All Registered Users</h1>
+
+    <div class="bg-white shadow-md rounded-2xl overflow-hidden">
+      <table class="min-w-full">
+        <thead class="bg-indigo-600 text-white">
+          <tr>
+            <th class="px-4 py-2 text-left">ID</th>
+            <th class="px-4 py-2 text-left">Username</th>
+            <th class="px-4 py-2 text-left">Email</th>
+            <th class="px-4 py-2 text-left">Role</th>
+            <th class="px-4 py-2 text-left">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          {% for user in users %}
+          <tr class="hover:bg-gray-50">
+            <td class="px-4 py-2">{{ user.id }}</td>
+            <td class="px-4 py-2">{{ user.username }}</td>
+            <td class="px-4 py-2">{{ user.email }}</td>
+            <td class="px-4 py-2">{{ user.role }}</td>
+            <td class="px-4 py-2 space-x-2">
+              {% if session.get('user') %}
+                {% if user.role == 'user' %}
+                  <!-- Promote -->
+                  <form action="{{ url_for('update_role', user_id=user.id) }}" method="POST" class="inline" onsubmit="return confirmRoleChange('promote', '{{ user.username }}')">
+                    <input type="hidden" name="role" value="admin">
+                    <button type="submit" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition text-sm">
+                      Promote to Admin
+                    </button>
+                  </form>
+                {% elif user.role == 'admin' %}
+                  {% if session['user']['id'] != user.id %}
+                  <!-- Demote -->
+                  <form action="{{ url_for('update_role', user_id=user.id) }}" method="POST" class="inline" onsubmit="return confirmRoleChange('demote', '{{ user.username }}')">
+                    <input type="hidden" name="role" value="user">
+                    <button type="submit" class="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition text-sm">
+                      Demote to User
+                    </button>
+                  </form>
+                  {% else %}
+                    <span class="text-gray-500 text-sm">Admin (You)</span>
+                  {% endif %}
+                {% endif %}
+
+                <!-- Delete User -->
+                {% if session['user']['id'] != user.id %}
+                <form action="{{ url_for('delete_user', user_id=user.id) }}" method="POST" class="inline" onsubmit="return confirmDelete('{{ user.username }}')">
+                  <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition text-sm">
+                    Delete
+                  </button>
+                </form>
+                {% endif %}
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- JS -->
+  <script>
+    const sidebar = document.getElementById("sidebar");
+    function toggleSidebar() {
+      sidebar.classList.toggle("-translate-x-full");
+    }
+
+    function confirmRoleChange(action, username) {
+      return confirm(`Are you sure you want to ${action} ${username}?`);
+    }
+
+    function confirmDelete(username) {
+      return confirm(`Are you sure you want to delete user ${username}? This action cannot be undone!`);
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Events</title>
+   <!-- JS -->
+<script src="{{ url_for('static', filename='main.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='dist/output.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f7f9fc; color: #333; }
+        .hero {background-color: #6b46c1;  /* Purple */
+background-size: cover;background-position: center;}
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px);} to { opacity: 1; transform: translateY(0);} }
+        .animate-fadeIn { animation: fadeIn 0.8s ease-out forwards; }
+        
+    </style>
+</head>
+<body class="antialiased">
+
+<!-- Header -->
+<!-- Header -->
+<header class="bg-white shadow-sm sticky top-0 z-50">
+  <div class="container mx-auto flex justify-between items-center p-4">
+    <!-- Logo -->
+    <div class="text-2xl font-bold text-indigo-700">Campus Events</div>
+
+    <!-- Desktop Nav -->
+    <nav class="hidden md:flex space-x-6 items-center">
+      <a href="#hero" class="text-gray-600 hover:text-indigo-700">Home</a>
+      <a href="#events" class="text-gray-600 hover:text-indigo-700">Events</a>
+      <a href="#gallery" class="text-gray-600 hover:text-indigo-700">Gallery</a>
+
+      {% if session.get('user') and session['user']['role'] == 'admin' %}
+        <a href="{{ url_for('admin') }}" class="text-gray-600 hover:text-indigo-700">Admin</a>
+      {% endif %}
+
+      {% if session.get('user') %}
+        <!-- ✅ Profile Dropdown -->
+        <div class="relative group ml-6">
+          <!-- Circle with first letter -->
+          <button id="profileMenuButton" class="flex items-center space-x-2">
+            <span class="rounded-full bg-indigo-600 text-white px-3 py-2">
+              {{ session['user']['username'][0] | upper }}
+            </span>
+          </button>
+
+          <!-- Dropdown -->
+          <div class="absolute right-0 mt-2 w-56 bg-white shadow-lg rounded-lg p-4 hidden group-hover:block">
+            <p class="font-semibold text-gray-800">{{ session['user']['username'] }}</p>
+            <p class="text-sm text-gray-500">{{ session['user']['email'] }}</p>
+            <hr class="my-3">
+            <a href="{{ url_for('logout') }}" class="block text-red-600 hover:text-red-800 text-sm">Logout</a>
+          </div>
+        </div>
+      {% else %}
+        <!-- Login / Register Buttons -->
+        <div class="ml-6 space-x-3">
+          <a href="{{ url_for('login') }}" class="px-4 py-2 border border-indigo-600 text-indigo-600 rounded-full hover:bg-indigo-50 transition">Login</a>
+          <a href="{{ url_for('register') }}" class="px-4 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition">Register</a>
+        </div>
+      {% endif %}
+    </nav>
+
+    <!-- Mobile Menu Button -->
+    <button class="md:hidden text-gray-600" id="mobile-menu-button">
+      <i class="fas fa-bars text-xl"></i>
+    </button>
+  </div>
+
+  <!-- Mobile Nav -->
+  <div class="md:hidden bg-white shadow-md hidden" id="mobile-menu">
+    <nav class="flex flex-col space-y-2 p-4">
+      <a href="#hero" class="text-gray-600 hover:text-indigo-700">Home</a>
+      <a href="#events" class="text-gray-600 hover:text-indigo-700">Events</a>
+      <a href="#about" class="text-gray-600 hover:text-indigo-700">About Us</a>
+
+      {% if session.get('user') and session['user']['role'] == 'admin' %}
+        <a href="{{ url_for('admin') }}" class="text-gray-600 hover:text-indigo-700">Admin</a>
+      {% endif %}
+
+      {% if session.get('user') %}
+        <!-- ✅ Mobile Profile Info -->
+        <div class="mt-6 bg-gray-50 p-4 rounded-lg shadow">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold">
+              {{ session['user']['username'][0]|upper }}
+            </div>
+            <div>
+              <p class="font-semibold text-gray-800">{{ session['user']['username'] }}</p>
+              <p class="text-sm text-gray-500">{{ session['user']['email'] }}</p>
+            </div>
+          </div>
+          <a href="{{ url_for('logout') }}" class="mt-3 block text-center bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition text-sm">Logout</a>
+        </div>
+      {% else %}
+        <!-- Mobile Login/Register -->
+        <a href="{{ url_for('login') }}" class="mt-4 px-4 py-2 border border-indigo-600 text-indigo-600 rounded-full text-center hover:bg-indigo-50">Login</a>
+        <a href="{{ url_for('register') }}" class="mt-2 px-4 py-2 bg-indigo-600 text-white rounded-full text-center hover:bg-indigo-700">Register</a>
+      {% endif %}
+    </nav>
+  </div>
+</header>
+
+
+
+<main>
+    <!-- Hero -->
+    <section id="hero" class="hero text-center text-white py-24 md:py-48 px-4 rounded-b-3xl shadow-lg">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-4xl md:text-6xl font-extrabold mb-4 animate-fadeIn">Discover and Join Campus Events</h1>
+            <p class="text-xl md:text-2xl font-light mb-8 animate-fadeIn" style="animation-delay: 0.2s;">Explore a wide range of academic, social, and cultural events happening on campus.</p>
+            <a href="#events" class="inline-block bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-3 px-8 rounded-full shadow-lg animate-fadeIn" style="animation-delay: 0.4s;">View All Events</a>
+        </div>
+    </section>
+
+
+       <!-- Search Events -->
+<section id="search" class="py-12 bg-white shadow-md rounded-3xl mx-4 md:mx-16 -mt-10 relative z-10">
+  <div class="container mx-auto text-center">
+    <h2 class="text-3xl font-bold text-indigo-700 mb-6">Search Events</h2>
+    <p class="text-gray-600 mb-10">Find events by name, category, or date and never miss out!</p>
+
+    <!-- Search Form -->
+    <form id="search-form" class="grid grid-cols-1 md:grid-cols-4 gap-6 px-4">
+      <!-- Search by Name -->
+      <div class="col-span-2">
+        <input 
+          type="text" 
+          id="search-name"
+          placeholder="Search by event name..." 
+          class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+      </div>
+
+      <!-- Category Dropdown -->
+      <div>
+        <select id="search-category" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <option value="">All Categories</option>
+          <option value="academic">Academic</option>
+          <option value="cultural">Cultural</option>
+          <option value="sports">Sports</option>
+          <option value="social">Social</option>
+        </select>
+      </div>
+
+      <!-- Date Picker -->
+      <div>
+        <input 
+          type="date" 
+          id="search-date"
+          class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+      </div>
+    </form>
+
+    <!-- Search Button -->
+    <div class="mt-8">
+      <button 
+        id="search-btn"
+        type="button" 
+        class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-3 rounded-full shadow-lg transition duration-300"
+      >
+        Search
+      </button>
+    </div>
+  </div>
+</section>
+
+
+<!-- Events -->
+<!-- Events Section -->
+<section id="events" class="py-16 px-4 bg-gray-50">
+  <div class="container mx-auto">
+    <h2 class="text-3xl font-bold text-center mb-6">Join Events</h2>
+
+    <!-- Event Counter -->
+    {% if events %}
+      <p class="text-center text-gray-600 mb-10">
+        Total Events: <span class="font-semibold text-indigo-600">{{ events|length }}</span>
+      </p>
+    {% endif %}
+
+    <!-- Event Grid -->
+    <div id="event-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {% if events %}
+        {% for event in events %}
+          <div class="event-card bg-white shadow-md rounded-lg overflow-hidden flex flex-col"
+               data-name="{{ event.title | lower }}"
+               data-category="{{ event.category | lower }}"
+               data-date="{{ event.date if event.date is string else event.date.strftime('%Y-%m-%d') }}">
+            
+            <!-- Event Image -->
+            {% if event.image %}
+              <img src="{{ event.image }}" alt="{{ event.title }}" class="w-full h-48 object-cover">
+            {% endif %}
+
+            <div class="p-6 flex flex-col flex-1">
+              <h3 class="text-xl font-semibold text-indigo-700 mb-2">{{ event.title }}</h3>
+              <p class="text-gray-600 mb-2">{{ event.description }}</p>
+              <p class="text-sm text-gray-500 mb-4">
+                📅 {{ event.date if event.date is string else event.date.strftime('%Y-%m-%d') }}
+              </p>
+
+              <!-- Register Button -->
+              {% if session and session.get("user") %}
+                <a href="{{ url_for('register_event_form', event_id=event.id) }}"
+                   class="mt-auto inline-block w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition">
+                  Register for Event
+                </a>
+              {% else %}
+                <a href="{{ url_for('login') }}"
+                   class="mt-auto inline-block w-full text-center bg-gray-400 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded-lg transition">
+                  Login to Register
+                </a>
+              {% endif %}
+
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="text-center text-gray-500 col-span-3">No upcoming events available.</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+
+<section id="gallery" class="py-20 px-6 bg-gradient-to-b from-gray-50 to-white">
+  <div class="max-w-7xl mx-auto">
+    <h2 class="text-4xl font-extrabold text-center text-gray-900 mb-12 tracking-tight">
+      Our Gallery
+    </h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      {% for item in gallery %}
+      <div class="relative bg-white rounded-2xl shadow-xl overflow-hidden transform hover:-translate-y-2 transition-all duration-300 group">
+        <div class="relative overflow-hidden">
+          <!-- Wrap image in anchor with download -->
+          <a href="{{ url_for('static', filename='uploads/' ~ item.image) }}" download="{{ item.name }}">
+            <img 
+              src="{{ url_for('static', filename='uploads/' ~ item.image) }}" 
+              alt="{{ item.name }}" 
+              class="w-full h-64 object-cover transform group-hover:scale-110 transition-transform duration-500"
+            >
+            <!-- Overlay -->
+            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
+              <i class="fas fa-download text-white text-3xl"></i>
+            </div>
+          </a>
+        </div>
+        <div class="p-6">
+          <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ item.name }}</h3>
+          <p class="text-gray-600 text-sm line-clamp-2">{{ item.description | default('Discover this amazing piece in our collection.') }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+
+<!-- chatbot -->
+ <div id="chatbot" class="fixed bottom-8 right-8 transition-all duration-300 ease-in-out z-50">
+    <button id="chatbotToggle" class="w-14 h-14 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full shadow-lg hover:shadow-2xl flex items-center justify-center transition-transform duration-200 hover:scale-110 hover:ring-4 hover:ring-blue-300/50">
+      <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+      </svg>
+    </button>
+    <div id="chatbotWindow" class="hidden w-80 sm:w-96 bg-gradient-to-br from-white to-gray-50 shadow-2xl rounded-2xl overflow-hidden transition-all duration-300">
+      <div class="p-4 bg-gradient-to-r from-blue-700 to-indigo-600 text-white font-semibold text-lg rounded-t-2xl flex items-center justify-between">
+        <span>Campus Bot</span>
+        <button id="closeChatbot" class="focus:outline-none hover:bg-blue-800/50 rounded-full p-1 transition duration-200">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div id="messages" class="h-72 sm:h-80 overflow-y-auto p-4 bg-gray-50 text-gray-800 text-sm space-y-3"></div>
+      <div class="flex p-3 border-t border-gray-200 bg-white">
+        <input id="userInput" class="flex-1 border border-gray-300 rounded-l-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 placeholder-gray-400 text-sm" placeholder="Ask about campus events...">
+        <button onclick="sendMessage()" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 sm:px-5 py-3 rounded-r-lg hover:from-blue-700 hover:to-indigo-700 transition duration-200 font-medium text-sm">Send</button>
+      </div>
+    </div>
+  </div>
+<!-- Feedback Section -->
+<section id="feedback" class="py-20 px-6 bg-white rounded-3xl shadow-inner mt-16">
+  <div class="container mx-auto max-w-3xl text-center">
+    <h2 class="text-4xl font-bold text-indigo-700 mb-6">Give Your Feedback</h2>
+    <p class="text-gray-600 mb-10">
+      Select an event and share your feedback to help us improve!
+    </p>
+
+    {% if session.get('user') %}
+    <form action="{{ url_for('submit_feedback') }}" method="POST" class="space-y-6">
+      
+      <!-- Event Dropdown -->
+      <div>
+        <select name="event_id" required
+                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <option value="">Select an Event</option>
+          {% for event in events %}
+            <option value="{{ event.id }}">{{ event.title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Feedback Textarea -->
+      <div>
+        <textarea name="message" rows="5" required
+                  class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Write your feedback here..."></textarea>
+      </div>
+
+      <!-- Submit Button -->
+      <div>
+        <button type="submit"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-3 rounded-full transition duration-300">
+          Submit Feedback
+        </button>
+      </div>
+    </form>
+    {% else %}
+      <p class="text-gray-500">
+        Please <a href="{{ url_for('login') }}" class="text-indigo-600 font-semibold">login</a> to submit feedback.
+      </p>
+    {% endif %}
+  </div>
+</section>
+
+    <!-- About Us -->
+<section id="about" class="py-20 px-6 bg-gray-100 rounded-3xl shadow-inner">
+  <div class="container mx-auto text-center max-w-5xl">
+    <h2 class="text-4xl font-bold mb-6 text-indigo-700">About Us</h2>
+    <p class="text-lg text-gray-700 leading-relaxed mb-12">
+      Campus Events is your one-stop platform for discovering, managing, and joining exciting events happening around the campus. 
+      Whether it's academic seminars, cultural fests, or social meetups, our mission is to keep students, organizers, and faculty connected and engaged.
+    </p>
+
+    <!-- Feature Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <!-- Card 1 -->
+      <div class="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition duration-300">
+        <div class="flex justify-center mb-4">
+          <i class="fas fa-users text-indigo-600 text-5xl"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-indigo-700 mb-2">Who We Are</h3>
+        <p class="text-gray-600">
+          A team of students and faculty passionate about creating a vibrant, connected, and informed campus community.
+        </p>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition duration-300">
+        <div class="flex justify-center mb-4">
+          <i class="fas fa-bullseye text-indigo-600 text-5xl"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-indigo-700 mb-2">Our Mission</h3>
+        <p class="text-gray-600">
+          To provide a platform that makes event discovery and participation seamless, interactive, and enjoyable for everyone.
+        </p>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition duration-300">
+        <div class="flex justify-center mb-4">
+          <i class="fas fa-lightbulb text-indigo-600 text-5xl"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-indigo-700 mb-2">Our Vision</h3>
+        <p class="text-gray-600">
+          To build a future where every student is informed, involved, and inspired to participate in campus life.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+    
+</main>
+
+<!-- Footer -->
+<!-- Footer -->
+<footer class="bg-gray-900 text-gray-300 py-12 mt-16 rounded-t-3xl">
+  <div class="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-10 px-6">
+    <!-- About -->
+    <div>
+      <h3 class="text-lg font-semibold text-white mb-4">Campus Events</h3>
+      <p class="text-sm leading-relaxed">
+        Campus Events is your gateway to all academic, cultural, and social activities happening on campus. 
+        Stay connected, discover opportunities, and never miss out on the fun.
+      </p>
+    </div>
+    <!-- Quick Links -->
+    <div>
+      <h3 class="text-lg font-semibold text-white mb-4">Quick Links</h3>
+      <ul class="space-y-2 text-sm">
+        <li><a href="#hero" class="hover:text-indigo-400">Home</a></li>
+        <li><a href="#events" class="hover:text-indigo-400">Events</a></li>
+        <li><a href="#about" class="hover:text-indigo-400">About Us</a></li>
+        <li><a href="#gallery" class="hover:text-indigo-400">Gallery</a></li>
+      </ul>
+    </div>
+    <!-- Contact Info -->
+    <div>
+      <h3 class="text-lg font-semibold text-white mb-4">Contact Us</h3>
+      <ul class="space-y-2 text-sm">
+        <li><i class="fas fa-map-marker-alt text-indigo-400 mr-2"></i> Dr. S. Radhakrisnan, A S Marg, Andheri East, Mumbai, Maharashtra 400069, India</li>
+        <li><i class="fas fa-envelope text-indigo-400 mr-2"></i> pandeymuskancs232401@gmail.com</li>
+        <li><i class="fas fa-phone text-indigo-400 mr-2"></i> +91 9321634721</li>
+      </ul>
+    </div>
+  </div>
+  <!-- Bottom Bar -->
+  <div class="border-t border-gray-700 mt-10 pt-6 text-center text-sm text-gray-500">
+    &copy; 2025 Campus Events. All Rights Reserved.
+  </div>
+</footer>
+
+
+
+<!-- ✅ JS at the bottom -->
+  <script>
+    document.getElementById("mobile-menu-button").addEventListener("click", function() {
+      const menu = document.getElementById("mobile-menu");
+      menu.classList.toggle("hidden");   // Show/Hide menu
+    });
+//chatbot msg js
+const toggleButton = document.getElementById('chatbotToggle');
+    const chatbotWindow = document.getElementById('chatbotWindow');
+    const closeButton = document.getElementById('closeChatbot');
+
+    toggleButton.addEventListener('click', () => {
+      chatbotWindow.classList.toggle('hidden');
+      toggleButton.classList.toggle('hidden');
+    });
+
+    closeButton.addEventListener('click', () => {
+      chatbotWindow.classList.add('hidden');
+      toggleButton.classList.remove('hidden');
+    });
+    async function sendMessage() {
+  let input = document.getElementById("userInput");
+  let messages = document.getElementById("messages");
+  let userMsg = input.value;
+
+  messages.innerHTML += `<div class='text-right text-blue-600'>You: ${userMsg}</div>`;
+
+  let response = await fetch("/chatbot", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({message: userMsg})
+  });
+  let data = await response.json();
+
+  messages.innerHTML += `<div class='text-left text-gray-700'>Bot: ${data.reply}</div>`;
+  input.value = "";
+  messages.scrollTop = messages.scrollHeight;
+}
+const profileButton = document.getElementById("profileMenuButton");
+  const dropdown = profileButton.nextElementSibling; // the dropdown div
+  let timeout;
+
+  profileButton.addEventListener("mouseenter", () => {
+    clearTimeout(timeout); // cancel hiding
+    dropdown.style.display = "block";
+  });
+
+  profileButton.addEventListener("mouseleave", () => {
+    timeout = setTimeout(() => {
+      dropdown.style.display = "none";
+    }, 5000); // 5000ms = 5 seconds
+  });
+
+  dropdown.addEventListener("mouseenter", () => {
+    clearTimeout(timeout); // keep it visible if hovering dropdown
+  });
+
+  dropdown.addEventListener("mouseleave", () => {
+    timeout = setTimeout(() => {
+      dropdown.style.display = "none";
+    }, 5000);
+  });
+
+
+  </script>
+
+</body>
+</html>
